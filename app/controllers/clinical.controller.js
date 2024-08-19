@@ -182,9 +182,11 @@ exports.forgotPassword = async (req, res) => {
                 </div>`
                 
                 let approveResult = mailTrans.sendMail(isUser.email, verifySubject, verifiedContent);
-                const updateUser = await Clinical.updateOne({ email: email }, { $set: { verifyCode: verifyCode, verifyTime: verifyTime } });
-                console.log(updateUser);
-                res.status(200).json({ message: "Sucess" });
+                if (approveResult) {
+                    const updateUser = await Clinical.updateOne({ email: email }, { $set: { verifyCode: verifyCode, verifyTime: verifyTime } });
+                    console.log(updateUser);
+                    res.status(200).json({ message: "Sucess" });
+                }
             }
             else {
                 res.status(400).json({message: "Failde to generate VerifyCode. Please try again!"})

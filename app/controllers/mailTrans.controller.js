@@ -48,7 +48,7 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY)
         console.log("Creating Transport")
         const msg = {
           to: email, // Change to your recipient
-          from: 'support@whybookdumb.com', // Change to your verified sender
+          from: process.env.USER, // Change to your verified sender
           subject: subject,
           html: content,
         }
@@ -58,6 +58,10 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY)
           .then((response) => {
             console.log(response[0].statusCode)
             console.log(response[0].headers)
+            if (response[0].status == '202') {
+                console.log('success SendGrid');
+                
+            }
             return true;
           })
           .catch((error) => {

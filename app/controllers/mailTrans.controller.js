@@ -39,7 +39,7 @@ dotenv.config()
 // sendMail('royhensley728@gmail.com', 'Test', 'test')
 
 const sgMail = require('@sendgrid/mail')
-sgMail.setApiKey(process.env.SENDGRID_API_KEY)
+sgMail.setApiKey(process.env.TWILIO_SENDGRID_API_KEY)
 
 
 

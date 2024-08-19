@@ -1,39 +1,71 @@
-var nodemailer = require('nodemailer');
-var http = require('http');
-var url = require('url');
+// var nodemailer = require('nodemailer');
+// var http = require('http');
+// var url = require('url');
 var dotenv = require('dotenv');
 dotenv.config()
 
-exports.sendMail = async(email, subject, content) => {
+// exports.sendMail = async(email, subject, content) => {
+//     try {
+//         console.log("Creating Transport")
+//         var transporter = nodemailer.createTransport({
+//             service:'gmail',
+//             auth: {
+//               user: "lovely7rh@gmail.com",
+//               pass: "hkobgghzvfhsewxr",
+//             }
+//         });
+//         var mailOptions = {
+//           from: "lovely7rh@gmail.com",
+//           to: email,
+//           subject: subject,
+//           html: content
+//         }
+//         console.log("Sending mail")
+//         transporter.sendMail(mailOptions, function(error, info) {
+//             if (error) {
+//                 console.log(error);
+//                 return false;
+//             } else {
+//                 console.log('Email sent: ' + info.response)
+//                 return true;
+//             }
+//         })
+//     } catch (error) {
+//         console.log(error);
+//         return false;
+//     }
+// }
+
+// sendMail('royhensley728@gmail.com', 'Test', 'test')
+
+const sgMail = require('@sendgrid/mail')
+sgMail.setApiKey(process.env.SENDGRID_API_KEY)
+
+
+
+  exports.sendMail = async(email, subject, content) => {
     try {
         console.log("Creating Transport")
-        var transporter = nodemailer.createTransport({
-            service:'gmail',
-            auth: {
-              user: "lovely7rh@gmail.com",
-              pass: "hkobgghzvfhsewxr",
-            }
-        });
-        var mailOptions = {
-          from: "lovely7rh@gmail.com",
-          to: email,
+        const msg = {
+          to: email, // Change to your recipient
+          from: 'support@whybookdumb.com', // Change to your verified sender
           subject: subject,
-          html: content
+          html: content,
         }
-        console.log("Sending mail")
-        transporter.sendMail(mailOptions, function(error, info) {
-            if (error) {
-                console.log(error);
-                return false;
-            } else {
-                console.log('Email sent: ' + info.response)
-                return true;
-            }
-        })
+        
+        sgMail
+          .send(msg)
+          .then((response) => {
+            console.log(response[0].statusCode)
+            console.log(response[0].headers)
+            return true;
+          })
+          .catch((error) => {
+            console.error(error)
+            return false;
+          })
     } catch (error) {
         console.log(error);
         return false;
     }
 }
-
-// sendMail('royhensley728@gmail.com', 'Test', 'test')

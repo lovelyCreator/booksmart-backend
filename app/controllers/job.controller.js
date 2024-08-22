@@ -601,7 +601,7 @@ const pushNotify = (reminderTime, name, verSub, verCnt, jobId) => {
     async () => {
       console.log("Reminder sent");
       MailTransfer(name, verSub, verCnt);
-      pushSms(name, verCnt);
+      const smsResults = pushSms(name, verCnt);
       let succed = false;
       const updateUser = await Job.updateOne({ jobId: jobId }, { $set: {jobStatus: 'Verified'} });
         if (!updateUser) {

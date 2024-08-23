@@ -568,9 +568,14 @@ console.log(date);
   return { startDateTime, endDateTime };
 }
 
-const pushNotify = (reminderTime, name, verSub, verCnt, jobId, offsetTime) => {  
+const pushNotify = (reminderTime, name, verSub, verCnt, jobId, offsetTime, smsVerCnt) => {  
   console.log('pending---', reminderTime);
-  let reminderTimes = new Date(reminderTime.getTime() + offsetTime*60*60*1000);
+  const currentDate = reminderTime.getTime();
+  console.log(currentDate, offsetTime);
+  
+  let reminderTimes = new Date(currentDate + offsetTime*60*60*1000);
+  console.log(reminderTimes, "---------");
+  
   if (reminderTimes.getHours() < 2) {
     reminderTimes.setHours(reminderTimes.getHours() + 18);
     reminderTimes.setDate(reminderTimes.getDate() - 1);
@@ -601,7 +606,7 @@ const pushNotify = (reminderTime, name, verSub, verCnt, jobId, offsetTime) => {
     async () => {
       console.log("Reminder sent");
       const mailSend = MailTransfer(name, verSub, verCnt);
-      const smsResults = pushSms(name, verCnt);
+      const smsResults = pushSms(name, smsVerCnt);
       let succed = false;
       const updateUser = await Job.updateOne({ jobId: jobId }, { $set: {jobStatus: 'Verified'} });
         if (!updateUser) {
@@ -645,6 +650,7 @@ exports.Update = async (req, res) => {
                   <p><strong><span class="il">BookSmart</span>™ <br></strong></p>
                   <p><br></p>
               </div>`
+        const smsContent = `${updatedDocument.nurse}: You failed in job:${updatedDocument.jobId} beacuse the Facility don't accept you.`
         const sucSub = `BookSmart™ - You accpeted Job`
         const sucCnt = `<div id=":18t" class="a3s aiL ">
                   <p>
@@ -655,6 +661,7 @@ exports.Update = async (req, res) => {
                   <p><strong><span class="il">BookSmart</span>™ <br></strong></p>
                   <p><br></p>
               </div>`
+        const smsSucCnt = `${updatedDocument.nurse}: You accepted in job:${updatedDocument.jobId}.`
               
         const verSub = `BookSmart™ - You have to prepare the job.`
         const verCnt = `<div id=":18t" class="a3s aiL ">
@@ -666,6 +673,7 @@ exports.Update = async (req, res) => {
                   <p><strong><span class="il">BookSmart</span>™ <br></strong></p>
                   <p><br></p>
               </div>`
+        const smsVerCnt = `${updatedDocument.nurse}: The job ${updatedDocument.jobId} will be started in 2 hours. Pleaset prepare the job.`
         const name = updatedDocument.nurse.split(' ');
         const jobId = updatedDocument.jobId;
 
@@ -678,8 +686,10 @@ exports.Update = async (req, res) => {
             }
             if (extracted.jobStatus === 'Cancelled') {
               MailTransfer(name, subject, content);
+              pushSms(name, smsContent)
             } else {
               MailTransfer(name, sucSub, sucCnt);
+              pushSms(name, smsSucCnt)
             }
           }
           else if(extracted.jobStatus === 'Pending Verification' && name !== ' ') {
@@ -689,11 +699,11 @@ exports.Update = async (req, res) => {
             const date = convertToDate(shiftDate, shiftTime)
             console.log(shiftDate, shiftTime, date.startDateTime, date);
             const reminderTime = new Date(date.startDateTime);  
-            console.log(reminderTime); 
-            const notify_result = pushNotify(reminderTime, name, verSub, verCnt, updatedDocument.jobId, extracted.offsetTime);       
+            console.log(reminderTime, extracted); 
+            const notify_result = pushNotify(reminderTime, name, verSub, verCnt, updatedDocument.jobId, request.offestTime, smsVerCnt);       
             if(!notify_result) {
               MailTransfer(name, subject, content);
-              pushSms(name, content);
+              pushSms(name, smsContent);
               const updateUser = await Job.updateOne({ jobId: jobId }, { $set: {jobStatus: 'Cancelled'} });
             }
           }
@@ -706,10 +716,10 @@ exports.Update = async (req, res) => {
           console.log(shiftDate, shiftTime, date.startDateTime, date);
           const reminderTime = new Date(date.startDateTime);  
           console.log(reminderTime); 
-          pushNotify(reminderTime, extracted.nurse, verSub, verCnt, updatedDocument.jobId, extracted.offsetTime);  
+          pushNotify(reminderTime, extracted.nurse, verSub, verCnt, updatedDocument.jobId, request.offestTime, smsVerCnt);  
           if(!notify_result) {
             MailTransfer(name, subject, content);
-            pushSms(name, content);
+            pushSms(name, smsContent);
             const updateUser = await Job.updateOne({ jobId: jobId }, { $set: {jobStatus: 'Cancelled'} });
           }
         }

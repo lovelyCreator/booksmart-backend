@@ -568,35 +568,35 @@ console.log(date);
   return { startDateTime, endDateTime };
 }
 
-const pushNotify = (reminderTime, name, verSub, verCnt, jobId) => {  
+const pushNotify = (reminderTime, name, verSub, verCnt, jobId, offsetTime) => {  
   console.log('pending---', reminderTime);
-
-  if (reminderTime.getHours() < 6) {
-    reminderTime.setHours(reminderTime.getHours() + 18);
-    reminderTime.setDate(reminderTime.getDate() - 1);
+  let reminderTimes = new Date(new Date().getTime() + offsetTime*60*60*1000);
+  if (reminderTimes.getHours() < 2) {
+    reminderTimes.setHours(reminderTimes.getHours() + 18);
+    reminderTimes.setDate(reminderTimes.getDate() - 1);
   } else {
-    reminderTime.setHours(reminderTime.getHours() - 2);
+    reminderTimes.setHours(reminderTimes.getHours() - 2);
   }
   now = new Date(Date.now());
-  if(reminderTime.getTime() < now.getTime()){
-    console.log(reminderTime, now);
-    reminderTime.setHours(reminderTime.getHours() + 1);
-    if(reminderTime.getTime() < now.getTime())
+  if(reminderTimes.getTime() < now.getTime()){
+    console.log(reminderTimes, now);
+    reminderTimes.setHours(reminderTimes.getHours() + 1);
+    if(reminderTimes.getTime() < now.getTime())
       return false;
     else{
       now.setMinutes(now.getMinutes() + 1);
-      reminderTime = now;
+      reminderTimes = now;
     }
   }
-  console.log(reminderTime);
+  console.log(reminderTimes);
   cron.schedule(
-    reminderTime.getMinutes() +
+    reminderTimes.getMinutes() +
       " " +
-      reminderTime.getHours() +
+      reminderTimes.getHours() +
       " " +
-      reminderTime.getDate() +
+      reminderTimes.getDate() +
       " " +
-      (reminderTime.getMonth() + 1) +
+      (reminderTimes.getMonth() + 1) +
       " *",
     async () => {
       console.log("Reminder sent");
@@ -690,7 +690,7 @@ exports.Update = async (req, res) => {
             console.log(shiftDate, shiftTime, date.startDateTime, date);
             const reminderTime = new Date(date.startDateTime);  
             console.log(reminderTime); 
-            const notify_result = pushNotify(reminderTime, name, verSub, verCnt, updatedDocument.jobId);       
+            const notify_result = pushNotify(reminderTime, name, verSub, verCnt, updatedDocument.jobId, extracted.offsetTime);       
             if(!notify_result) {
               MailTransfer(name, subject, content);
               pushSms(name, content);
@@ -706,7 +706,7 @@ exports.Update = async (req, res) => {
           console.log(shiftDate, shiftTime, date.startDateTime, date);
           const reminderTime = new Date(date.startDateTime);  
           console.log(reminderTime); 
-          pushNotify(reminderTime, extracted.nurse, verSub, verCnt, updatedDocument.jobId);  
+          pushNotify(reminderTime, extracted.nurse, verSub, verCnt, updatedDocument.jobId, extracted.offsetTime);  
           if(!notify_result) {
             MailTransfer(name, subject, content);
             pushSms(name, content);
@@ -753,7 +753,7 @@ function convertTo24Hour(time) {
   return hour.toString().padStart(2, '0') + ':00'; // Return in HH:MM format
 }
 let invoiceGenerate = false;
-const job = cron.schedule('00 22 * * Friday', () => {
+const job = cron.schedule('00 18 * * Friday', () => {
   // Your task code here
   console.log("start");
   generateInovices();

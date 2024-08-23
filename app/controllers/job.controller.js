@@ -528,8 +528,8 @@ function convertToDate(dateString, timeString) {
   const [month, day, year] = dateString.split('/').map(Number);
   console.log(month, day, year);
   // Create a new Date object using the parsed date
-  const date = new Date(year, month - 1, day); // month is 0-indexed in JavaScript
-  console.log(date);
+   // month is 0-indexed in JavaScript
+  // console.log(date);
   // Parse the time range (7.05a-8.10p)
   const [startTime, endTime] = timeString.split('-');
 
@@ -538,7 +538,7 @@ function convertToDate(dateString, timeString) {
       const isPM = time.endsWith('p'); // Check if it's PM
       const [hourPart, minutePart] = time.slice(0, -1).split('.'); // Split by decimal
       let hour = parseInt(hourPart, 10); // Get the hour part
-      console.log(minutePart);
+      console.log(minutePart, hour);
       const minutes = minutePart ? Math.round(parseFloat(`0.${minutePart}`) * 100) : 0; // Convert decimal to minutes
 
       if (isPM && hour !== 12) {
@@ -547,23 +547,31 @@ function convertToDate(dateString, timeString) {
       if (!isPM && hour === 12) {
           hour = 0; // Midnight case
       }
-
+      console.log(hour, minutes);
+      
       return { hour, minutes };
   };
 
   // Get the start and end hours and minutes
   const { hour: startHour, minutes: startMinutes } = parseTime(startTime);
   const { hour: endHour, minutes: endMinutes } = parseTime(endTime);
+  console.log(startHour, startMinutes)
 
+  const date = new Date(Date.UTC(year, month - 1, day, startHour, startMinutes, 0));
   // Set the start time to the date
-  date.setHours(startHour, startMinutes, 0, 0); // Set hours, minutes, seconds, milliseconds
-
+  console.log("aaa: ",date);
+  // date.setHours(startHour, startMinutes, 0, 0); // Set hours, minutes, seconds, milliseconds
+  // date.setMinutes(startMinutes);
+  console.log("bbb: ",date);
+  
   // Create an array to hold the start and end Date objects
   const startDateTime = new Date(date); // Start time
-  const endDateTime = new Date(date); // End time
+  
+  const dateEnd = new Date(Date.UTC(year, month - 1, day, endHour, endMinutes, 0));
+  const endDateTime = new Date(dateEnd); // End time
 
   // Set the end time
-  endDateTime.setHours(endHour + 7, endMinutes, 0, 0); // Set end hours and minutes
+  // endDateTime.setHours(endHour, endMinutes, 0, 0); // Set end hours and minutes
 
   return { startDateTime, endDateTime };
 }
@@ -610,7 +618,7 @@ const pushNotify = (reminderTime, name, verSub, verCnt, jobId, offsetTime, smsVe
       let succed = false;
       const updateUser = await Job.updateOne({ jobId: jobId }, { $set: {jobStatus: 'Verified'} });
         if (!updateUser) {
-          console.log(err);
+          console.log('ERROR : ', err);
           return succed
         } else {
           console.log(succed)
@@ -696,6 +704,7 @@ exports.Update = async (req, res) => {
             console.log('pending');
             const shiftTime = updatedDocument.shiftTime;
             const shiftDate = updatedDocument.shiftDate;
+            console.log(shiftTime)
             const date = convertToDate(shiftDate, shiftTime)
             console.log(shiftDate, shiftTime, date.startDateTime, date);
             const reminderTime = new Date(date.startDateTime);  

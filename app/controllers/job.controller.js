@@ -529,7 +529,7 @@ function convertToDate(dateString, timeString) {
   console.log(month, day, year);
   // Create a new Date object using the parsed date
   const date = new Date(year, month - 1, day); // month is 0-indexed in JavaScript
-console.log(date);
+  console.log(date);
   // Parse the time range (7.05a-8.10p)
   const [startTime, endTime] = timeString.split('-');
 
@@ -556,7 +556,7 @@ console.log(date);
   const { hour: endHour, minutes: endMinutes } = parseTime(endTime);
 
   // Set the start time to the date
-  date.setHours(startHour + 7, startMinutes, 0, 0); // Set hours, minutes, seconds, milliseconds
+  date.setHours(startHour, startMinutes, 0, 0); // Set hours, minutes, seconds, milliseconds
 
   // Create an array to hold the start and end Date objects
   const startDateTime = new Date(date); // Start time
@@ -577,7 +577,7 @@ const pushNotify = (reminderTime, name, verSub, verCnt, jobId, offsetTime, smsVe
   console.log(reminderTimes, "---------");
   
   if (reminderTimes.getHours() < 2) {
-    reminderTimes.setHours(reminderTimes.getHours() + 18);
+    reminderTimes.setHours(reminderTimes.getHours() + 22);
     reminderTimes.setDate(reminderTimes.getDate() - 1);
   } else {
     reminderTimes.setHours(reminderTimes.getHours() - 2);

@@ -571,8 +571,8 @@ console.log(date);
 const pushNotify = (reminderTime, name, verSub, verCnt, jobId) => {  
   console.log('pending---', reminderTime);
 
-  if (reminderTime.getHours() < 2) {
-    reminderTime.setHours(reminderTime.getHours() + 22);
+  if (reminderTime.getHours() < 6) {
+    reminderTime.setHours(reminderTime.getHours() + 18);
     reminderTime.setDate(reminderTime.getDate() - 1);
   } else {
     reminderTime.setHours(reminderTime.getHours() - 2);
@@ -600,7 +600,7 @@ const pushNotify = (reminderTime, name, verSub, verCnt, jobId) => {
       " *",
     async () => {
       console.log("Reminder sent");
-      MailTransfer(name, verSub, verCnt);
+      const mailSend = MailTransfer(name, verSub, verCnt);
       const smsResults = pushSms(name, verCnt);
       let succed = false;
       const updateUser = await Job.updateOne({ jobId: jobId }, { $set: {jobStatus: 'Verified'} });
@@ -753,7 +753,7 @@ function convertTo24Hour(time) {
   return hour.toString().padStart(2, '0') + ':00'; // Return in HH:MM format
 }
 let invoiceGenerate = false;
-const job = cron.schedule('00 1 * * saturday', () => {
+const job = cron.schedule('00 22 * * Friday', () => {
   // Your task code here
   console.log("start");
   generateInovices();

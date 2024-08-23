@@ -570,7 +570,7 @@ console.log(date);
 
 const pushNotify = (reminderTime, name, verSub, verCnt, jobId, offsetTime) => {  
   console.log('pending---', reminderTime);
-  let reminderTimes = new Date(new Date().getTime() + offsetTime*60*60*1000);
+  let reminderTimes = new Date(reminderTime.getTime() + offsetTime*60*60*1000);
   if (reminderTimes.getHours() < 2) {
     reminderTimes.setHours(reminderTimes.getHours() + 18);
     reminderTimes.setDate(reminderTimes.getDate() - 1);

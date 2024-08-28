@@ -82,21 +82,26 @@ exports.login = async (req, res) => {
         console.log("email: ", contactEmail)
         const isUser = await Facility.findOne({ contactEmail: contactEmail, password: password, userRole: userRole });
         if (isUser) {
-            console.log('isUser', isUser)
-            const payload = {
-                contactEmail: isUser.contactEmail,
-                userRole: isUser.userRole,
-                iat: Math.floor(Date.now() / 1000), // Issued at time
-                exp: Math.floor(Date.now() / 1000) + expirationTime // Expiration time
-            }
-            const token = setToken(payload);
-            console.log(token);
-            if (token) {
-                const updateUser = await Facility.updateOne({ contactEmail: contactEmail, userRole: userRole }, { $set: { userStatus: true } });
-                res.status(200).json({ message: "Successfully Logined!", token: token, user: isUser });
+            if (isUser.userStatus === 'activate') {
+                console.log('isUser', isUser)
+                const payload = {
+                    contactEmail: isUser.contactEmail,
+                    userRole: isUser.userRole,
+                    iat: Math.floor(Date.now() / 1000), // Issued at time
+                    exp: Math.floor(Date.now() / 1000) + expirationTime // Expiration time
+                }
+                const token = setToken(payload);
+                console.log(token);
+                if (token) {
+                    // const updateUser = await Facility.updateOne({ contactEmail: contactEmail, userRole: userRole }, { $set: { userStatus: 'activate' } });
+                    res.status(200).json({ message: "Successfully Logined!", token: token, user: isUser });
+                }
+                else {
+                    res.status(400).json({ message: "Cannot logined User!" })
+                }
             }
             else {
-                res.status(400).json({ message: "Cannot logined User!" })
+                res.status(402).json({message: "You are not approved! Please wait until the admin accept you."})
             }
         }
         else {
